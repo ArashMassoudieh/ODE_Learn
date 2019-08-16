@@ -1,0 +1,58 @@
+# depslib dependency file v1.0
+1565968479 source:/home/arash/Projects/ODE_Learn/main.cpp
+	<iostream>
+
+1565975116 source:/home/arash/Projects/ODE_Learn/src/ControlParameter.cpp
+	"ControlParameter.h"
+
+1565975143 /home/arash/Projects/ODE_Learn/include/ControlParameter.h
+	"string.h"
+	"Object.h"
+
+1565977147 /home/arash/Projects/ODE_Learn/include/Object.h
+	<string>
+	<Expression.h>
+
+1565975032 source:/home/arash/Projects/ODE_Learn/src/ExternalForcing.cpp
+	"ExternalForcing.h"
+
+1565975060 /home/arash/Projects/ODE_Learn/include/ExternalForcing.h
+	"Object.h"
+
+1565974408 source:/home/arash/Projects/ODE_Learn/src/Object.cpp
+	"Object.h"
+
+1565975109 source:/home/arash/Projects/ODE_Learn/src/StateVariable.cpp
+	"StateVariable.h"
+
+1565976264 /home/arash/Projects/ODE_Learn/include/StateVariable.h
+	"Object.h"
+	"Expression.h"
+
+1565976783 /home/arash/Projects/ODE_Learn/include/Expression.h
+	<string>
+	<vector>
+
+1565968575 source:/home/arash/Projects/ODE_Learn/src/System.cpp
+	"System.h"
+
+1565974298 /home/arash/Projects/ODE_Learn/include/System.h
+	"StateVariable.h"
+	"ControlParameter.h"
+	"ExternalForcing.h"
+	<vector>
+
+1565977094 source:/home/arash/Projects/ODE_Learn/src/Expression.cpp
+	"Expression.h"
+	"Expression.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<cmath>
+	<iostream>
+	<StateVariable.h>
+	<ExternalForcing.h>
+	<ControlParameter.h>
+	<fstream>
+	<sstream>
+

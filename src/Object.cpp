@@ -21,3 +21,8 @@ Object& Object::operator=(const Object& rhs)
     //assignment operator
     return *this;
 }
+
+void Object::SetParent(System *system)
+{
+    parent = system;
+}

@@ -4,6 +4,7 @@
 #include <string>
 #include <Expression.h>
 
+class System;
 
 using namespace std;
 
@@ -14,7 +15,7 @@ class Object
         virtual ~Object();
         Object(const Object& other);
         Object& operator=(const Object& other);
-        string GetName() {return name;}
+        string GetName() const {return name;}
         void SetName(const string &_name) {name = _name; }
         double GetValue(const Expression::timing &tmg=Expression::timing::present)
         {
@@ -30,12 +31,14 @@ class Object
             else
                 value_current = val;
         }
+        void SetParent(System *system);
     protected:
 
     private:
         string name;
         double value_past;
         double value_current;
+        System *parent;
 };
 
 #endif // OBJECT_H

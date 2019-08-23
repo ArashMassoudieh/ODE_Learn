@@ -11,7 +11,7 @@ class StateVariable : public Object
         virtual ~StateVariable();
         StateVariable(const StateVariable& other);
         StateVariable& operator=(const StateVariable& other);
-
+        double CalcRateOfChange();
     protected:
 
     private:

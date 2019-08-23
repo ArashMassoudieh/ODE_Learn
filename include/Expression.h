@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-class Object;
+class System;
 
 using namespace std;
 
@@ -12,7 +12,7 @@ class Expression
     public:
         virtual ~Expression();
         Expression(void);
-        Expression(string S);
+        Expression(string S, System *sys);
         Expression(const Expression &S);
         Expression& operator=(const Expression&);
         vector<string> operators;
@@ -26,19 +26,18 @@ class Expression
         vector<string> _errors;
         vector<string> extract_terms(string s);
         enum class timing {past, present, both};
-        double calc(Object *W, const timing &tmg, bool limit = false);
+        double calc(System *S, const timing &tmg, bool limit = false);
         double func(string & f, double val);
         double func(string & f, double val1, double val2);
         double func(string &f, double cond, double val1, double val2);
         double oprt(string & f, double val1, double val2);
-        double oprt(string & f, unsigned int i1, unsigned int i2, Object * W, const timing &tmg, bool limit=false);
+        double oprt(string & f, unsigned int i1, unsigned int i2, System * S, const timing &tmg, bool limit=false);
         vector<string> funcs;
         string unit;
         string text;
         vector<string> opts;
         int lookup_operators(const string &s);
         int count_operators(const string &s);
-        enum loc {self, source, destination};
         string ToString();
     protected:
 
@@ -46,7 +45,7 @@ class Expression
         vector<double> term_vals;
         vector<bool> terms_calculated;
         vector<vector<int> > sources;
-        loc location = loc::self; //0: self, 1: start, 2: end
+
 
 };
 

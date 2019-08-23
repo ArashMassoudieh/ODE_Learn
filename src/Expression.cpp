@@ -12,6 +12,7 @@
 #include <ControlParameter.h>
 #include <fstream>
 #include <sstream>
+#include "System.h"
 
 
 using namespace std;
@@ -35,7 +36,7 @@ Expression::Expression(void)
 
 }
 
-Expression::Expression(string S)
+Expression::Expression(string S, System *sys)
 {
 	text = S;
 	#ifdef Debug_mode
@@ -112,7 +113,7 @@ Expression::Expression(string S)
 					if ((S.substr(i, 1) == "+") || (S.substr(i, 1) == "-") || (S.substr(i, 1) == "*") || (S.substr(i, 1) == "/") || (S.substr(i, 1) == "^"))
 					{
 						operators.push_back(S.substr(i, 1));
-						Expression sub_exp = Expression(trim(S.substr(last_operator_location+1, i -1- last_operator_location)));
+						Expression sub_exp = Expression(trim(S.substr(last_operator_location+1, i -1- last_operator_location)),sys);
 						if (sub_exp.text != "")
 						{
 							if (operators.size() > 1)
@@ -123,7 +124,7 @@ Expression::Expression(string S)
 						}
 						else
 						{
-							sub_exp = Expression("0");
+							sub_exp = Expression("0",sys);
 							sub_exp.sign = "+";
 							terms.push_back(sub_exp);
 						}
@@ -132,7 +133,7 @@ Expression::Expression(string S)
 					}
 			}
 
-			Expression sub_exp = Expression(trim(S.substr(last_operator_location+1, S.size() - last_operator_location)));
+			Expression sub_exp = Expression(trim(S.substr(last_operator_location+1, S.size() - last_operator_location)),sys);
 			if (operators.size() > 0)
 				sub_exp.sign = operators[operators.size() - 1];
 			else
@@ -143,23 +144,24 @@ Expression::Expression(string S)
 		}
 		else
 		{
-			param_constant_expression = "parameter";
-			if (split(S,'.').size()==1)
-			{   parameter = S;
-                location = loc::self;
-			}
-			else if (split(S,'.').size()==2)
+			if (sys->state(S))
             {
-                if (tolower(split(S,'.')[1]) == "s")
-                {
-                    parameter = split(S,'.')[0];
-                    location = loc::source;
-                }
-                if (tolower(split(S,'.')[1]) == "e")
-                {
-                    parameter = split(S,'.')[0];
-                    location = loc::destination;
-                }
+                param_constant_expression = "state";
+                parameter = S;
+            }
+            else if (sys->exforce(S))
+            {
+                param_constant_expression = "exforce";
+                parameter = S;
+            }
+            else if (sys->control(S))
+            {
+                param_constant_expression = "control";
+                parameter = S;
+            }
+            else
+            {
+                cout<<"Variable '" + S + "' was not found";
             }
 		}
 	}
@@ -181,7 +183,7 @@ Expression::Expression(const Expression & S)
 	param_constant_expression = S.param_constant_expression;
 	unit = S.unit;
 	text = S.text;
-	location = S.location;
+
 }
 
 Expression & Expression::operator=(const Expression &S)
@@ -197,7 +199,6 @@ Expression & Expression::operator=(const Expression &S)
 	param_constant_expression = S.param_constant_expression;
 	unit = S.unit;
 	text = S.text;
-    location = S.location;
 	return *this;
 }
 
@@ -272,9 +273,9 @@ int lookup(const vector<vector<int> > &s, const vector<int> &s1)
 }
 
 
-double Expression::calc(Object *W, const timing &tmg, bool limit)
+double Expression::calc(System *S, const timing &tmg, bool limit)
 {
-	if (!W)
+	if (!S)
 	{
 		cout << "Pointer is empty!" << endl;
 		return 0;
@@ -286,9 +287,9 @@ double Expression::calc(Object *W, const timing &tmg, bool limit)
 
 	if (param_constant_expression == "constant")
 		return constant;
-	if (param_constant_expression == "parameter")
+	if (param_constant_expression == "state" || param_constant_expression == "exforce" || param_constant_expression == "control")
 	{
-		return W->GetValue(tmg);
+		return S->GetValue(parameter,tmg);
 	}
 	if (param_constant_expression == "expression")
 	{
@@ -304,24 +305,24 @@ double Expression::calc(Object *W, const timing &tmg, bool limit)
 		for (int i = operators.size() - 1; i >= 0; i--)
 		{
 			if (operators[i] == "^")
-				oprt(operators[i], i, i + 1, W, tmg, limit);
+				oprt(operators[i], i, i + 1, S, tmg, limit);
 		}
 		for (int i = operators.size() - 1; i >= 0; i--)
 		{
 			if (operators[i] == "*")
-				oprt(operators[i], i, i + 1, W, tmg, limit);
+				oprt(operators[i], i, i + 1, S, tmg, limit);
 		}
 
 		for (int i = operators.size() - 1; i >= 0; i--)
 		{
 			if (operators[i] == "/")
-				oprt(operators[i], i, i + 1, W, tmg,limit);
+				oprt(operators[i], i, i + 1, S, tmg,limit);
 		}
 
 		for (int i = operators.size() - 1; i >= 0; i--)
 		{
 			if (operators[i] == "+")
-				oprt(operators[i], i, i + 1, W, tmg,limit);
+				oprt(operators[i], i, i + 1, S, tmg,limit);
 
 		}
 
@@ -329,7 +330,7 @@ double Expression::calc(Object *W, const timing &tmg, bool limit)
 		{
 			if (operators[i] == "-")
 			{
-				oprt(operators[i], i, i + 1, W, tmg,limit);
+				oprt(operators[i], i, i + 1, S, tmg,limit);
 			}
 		}
 
@@ -400,7 +401,7 @@ double Expression::oprt(string &f, double val1, double val2)
 	return 0;
 }
 
-double Expression::oprt(string &f, unsigned int i1, unsigned int i2, Object *W, const Expression::timing &tmg, bool limit)
+double Expression::oprt(string &f, unsigned int i1, unsigned int i2, System *S, const Expression::timing &tmg, bool limit)
 {
 
 	#ifdef Debug_mode
@@ -423,13 +424,13 @@ double Expression::oprt(string &f, unsigned int i1, unsigned int i2, Object *W, 
 
 	double val1;
 	double val2;
-	if (terms_calculated[i1]) val1 = term_vals[i1]; else val1 = terms[i1].calc(W, tmg, limit);
+	if (terms_calculated[i1]) val1 = term_vals[i1]; else val1 = terms[i1].calc(S, tmg, limit);
 	if (terms[i1].sign == "/") val1 = 1/val1;
 	if (terms[i1].sign == "-") val1 = -val1;
 	if (sources.size() > i2)
 		if (terms_calculated[i2]) val2 = term_vals[i2]; else
 		{
-			val2 = terms[i2].calc(W, tmg, limit);
+			val2 = terms[i2].calc(S, tmg, limit);
 			if (terms[i2].sign == "/") val2 = 1 / val2;
 			if (terms[i2].sign == "-") val2 = -val2;
 		}
@@ -939,10 +940,6 @@ string Expression::ToString()
     if (param_constant_expression=="parameter")
     {
         out += parameter;
-        if (location == loc::source)
-            out+=".s";
-        if (location == loc::destination)
-            out+=".e";
         return out;
     }
     if (param_constant_expression=="constant")

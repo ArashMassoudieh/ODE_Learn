@@ -93,7 +93,7 @@ double System::GetValue(const string &param, Expression::timing tmg)
         return control(param)->GetValue(tmg);
 
     if (GetType(param) == object_type::exforce)
-        return exforce(param)->GetValue(tmg);
+        return exforce(param)->Object::GetValue(tmg);
 }
 
 bool System::AppendState(const StateVariable &stt)

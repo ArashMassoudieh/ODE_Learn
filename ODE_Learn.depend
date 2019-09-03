@@ -1,51 +1,52 @@
 # depslib dependency file v1.0
-1566742673 source:/home/arash/Projects/ODE_Learn/main.cpp
+1567476534 source:/home/arash/Projects/ODE_Learn/main.cpp
 	<iostream>
 	"System.h"
+	<string>
 
-1566059053 source:/home/arash/Projects/ODE_Learn/src/ControlParameter.cpp
+1566753105 source:/home/arash/Projects/ODE_Learn/src/ControlParameter.cpp
 	"ControlParameter.h"
 
-1566059053 /home/arash/Projects/ODE_Learn/include/ControlParameter.h
+1566753105 /home/arash/Projects/ODE_Learn/include/ControlParameter.h
 	"string.h"
 	"Object.h"
 
-1566741710 /home/arash/Projects/ODE_Learn/include/Object.h
+1567476825 /home/arash/Projects/ODE_Learn/include/Object.h
 	<string>
 	<Expression.h>
 
-1566743519 source:/home/arash/Projects/ODE_Learn/src/ExternalForcing.cpp
+1566753105 source:/home/arash/Projects/ODE_Learn/src/ExternalForcing.cpp
 	"ExternalForcing.h"
 
-1566743220 /home/arash/Projects/ODE_Learn/include/ExternalForcing.h
+1566753105 /home/arash/Projects/ODE_Learn/include/ExternalForcing.h
 	"Object.h"
 	"BTC.h"
 
-1566741710 source:/home/arash/Projects/ODE_Learn/src/Object.cpp
+1567476208 source:/home/arash/Projects/ODE_Learn/src/Object.cpp
 	"Object.h"
 
-1566059053 source:/home/arash/Projects/ODE_Learn/src/StateVariable.cpp
+1566753105 source:/home/arash/Projects/ODE_Learn/src/StateVariable.cpp
 	"StateVariable.h"
 
-1566741710 /home/arash/Projects/ODE_Learn/include/StateVariable.h
+1566753105 /home/arash/Projects/ODE_Learn/include/StateVariable.h
 	"Object.h"
 	"Expression.h"
 
-1566741710 /home/arash/Projects/ODE_Learn/include/Expression.h
+1567476441 /home/arash/Projects/ODE_Learn/include/Expression.h
 	<string>
 	<vector>
 
-1566744117 source:/home/arash/Projects/ODE_Learn/src/System.cpp
+1566753105 source:/home/arash/Projects/ODE_Learn/src/System.cpp
 	"System.h"
 	<iostream>
 
-1566741710 /home/arash/Projects/ODE_Learn/include/System.h
+1566753105 /home/arash/Projects/ODE_Learn/include/System.h
 	"StateVariable.h"
 	"ControlParameter.h"
 	"ExternalForcing.h"
 	<vector>
 
-1566741710 source:/home/arash/Projects/ODE_Learn/src/Expression.cpp
+1567476570 source:/home/arash/Projects/ODE_Learn/src/Expression.cpp
 	"Expression.h"
 	"Expression.h"
 	<stdio.h>
@@ -60,7 +61,7 @@
 	<sstream>
 	"System.h"
 
-1566059053 /home/arash/Projects/ODE_Learn/include/BTC.h
+1566753105 /home/arash/Projects/ODE_Learn/include/BTC.h
 	<map>
 	<string>
 	<vector>
@@ -70,21 +71,21 @@
 	"qmap.h"
 	"qvariant.h"
 
-1549214791 /home/arash/Projects/ODE_Learn/include/QuickSort.h
+1566753105 /home/arash/Projects/ODE_Learn/include/QuickSort.h
 	<vector>
 
-1549214791 /home/arash/Projects/ODE_Learn/include/NormalDist.h
+1566753105 /home/arash/Projects/ODE_Learn/include/NormalDist.h
 	"Vector.h"
 	"Matrix.h"
 	"NormalDist.h"
 
-1566059053 /home/arash/Projects/ODE_Learn/include/Vector.h
+1566753105 /home/arash/Projects/ODE_Learn/include/Vector.h
 	<iostream>
 	<vector>
 	"QuickSort.h"
 	"armadillo"
 
-1566059053 /home/arash/Projects/ODE_Learn/include/Matrix.h
+1566753105 /home/arash/Projects/ODE_Learn/include/Matrix.h
 	<vector>
 	<iostream>
 	<math.h>
@@ -93,18 +94,18 @@
 	"Matrix_arma.h"
 	"Vector_arma.h"
 
-1566059053 /home/arash/Projects/ODE_Learn/include/Matrix_arma.h
+1566753105 /home/arash/Projects/ODE_Learn/include/Matrix_arma.h
 	"Vector_arma.h"
 	<iostream>
 	<math.h>
 	"armadillo"
 
-1566059053 /home/arash/Projects/ODE_Learn/include/Vector_arma.h
+1566753105 /home/arash/Projects/ODE_Learn/include/Vector_arma.h
 	<iostream>
 	<vector>
 	"armadillo"
 
-1549214791 source:/home/arash/Projects/ODE_Learn/src/QuickSort.cpp
+1566753105 source:/home/arash/Projects/ODE_Learn/src/QuickSort.cpp
 	"QuickSort.h"
 	<iostream>
 	<algorithm>
@@ -112,7 +113,7 @@
 	"time.h"
 	"qdebug.h"
 
-1566059053 source:/home/arash/Projects/ODE_Learn/src/BTC.cpp
+1566753105 source:/home/arash/Projects/ODE_Learn/src/BTC.cpp
 	"BTC.h"
 	"math.h"
 	"string.h"
@@ -123,14 +124,14 @@
 	"qfile.h"
 	"qdatastream.h"
 
-1549214791 source:/home/arash/Projects/ODE_Learn/src/NormalDist.cpp
+1566753105 source:/home/arash/Projects/ODE_Learn/src/NormalDist.cpp
 	"Vector.h"
 	"Matrix.h"
 	"NormalDist.h"
 	<cstdlib>
 	"math.h"
 
-1566059053 source:/home/arash/Projects/ODE_Learn/src/BTCSet.cpp
+1566753105 source:/home/arash/Projects/ODE_Learn/src/BTCSet.cpp
 	"BTCSet.h"
 	"string.h"
 	<fstream>
@@ -143,21 +144,56 @@
 	"qdebug.h"
 	"qdatastream.h"
 
-1566059053 /home/arash/Projects/ODE_Learn/include/BTCSet.h
+1566753105 /home/arash/Projects/ODE_Learn/include/BTCSet.h
 	"BTC.h"
 	<vector>
 	"Vector.h"
 
-1566059053 /home/arash/Projects/ODE_Learn/include/StringOP.h
+1566753105 /home/arash/Projects/ODE_Learn/include/StringOP.h
 	<vector>
 	<string>
 	<sstream>
 
-1549214791 /home/arash/Projects/ODE_Learn/include/DistributionNUnif.h
+1566753105 /home/arash/Projects/ODE_Learn/include/DistributionNUnif.h
 	<vector>
 
-1549214791 source:/home/arash/Projects/ODE_Learn/src/DistributionNUnif.cpp
+1566753105 source:/home/arash/Projects/ODE_Learn/src/DistributionNUnif.cpp
 	"DistributionNUnif.h"
 	"math.h"
 	<stdlib.h>
+
+1566753105 source:/home/arash/Projects/ODE_Learn/src/Vector.cpp
+	"Vector.h"
+	"math.h"
+	"Matrix.h"
+	<cfloat>
+	"Vector_arma.h"
+
+1566753105 source:/home/arash/Projects/ODE_Learn/src/Vector_arma.cpp
+	"Vector_arma.h"
+	"math.h"
+	"Matrix_arma.h"
+	<cfloat>
+	"Vector.h"
+	"Expression.h"
+
+1566753105 source:/home/arash/Projects/ODE_Learn/src/Matrix.cpp
+	"Matrix.h"
+	"math.h"
+	<iostream>
+	"armadillo"
+	"StringOP.h"
+	"Vector.h"
+	"qstring.h"
+	"qmap.h"
+	"qvariant.h"
+
+1566753105 source:/home/arash/Projects/ODE_Learn/src/Matrix_arma.cpp
+	"Matrix_arma.h"
+	"Vector_arma.h"
+	"math.h"
+	<iostream>
+	"armadillo"
+	<vector>
+	"Vector.h"
 

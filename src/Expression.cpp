@@ -36,8 +36,9 @@ Expression::Expression(void)
 
 }
 
-Expression::Expression(string S, System *sys)
+Expression::Expression(const string &_S, System *sys)
 {
+	string S = _S;
 	text = S;
 	#ifdef Debug_mode
 	//cout<<text<<endl;

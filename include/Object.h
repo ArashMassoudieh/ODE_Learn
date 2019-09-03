@@ -28,8 +28,13 @@ class Object
         {
             if (tmg==Expression::timing::past)
                 value_past = val;
-            else
+            else if (tmg==Expression::timing::present)
                 value_current = val;
+            else if (tmg==Expression::timing::both)
+            {
+                value_past = val;
+                value_current = val;
+            }
         }
         void SetParent(System *system);
     protected:

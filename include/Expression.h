@@ -12,7 +12,7 @@ class Expression
     public:
         virtual ~Expression();
         Expression(void);
-        Expression(string S, System *sys);
+        Expression(const string &S, System *sys);
         Expression(const Expression &S);
         Expression& operator=(const Expression&);
         vector<string> operators;

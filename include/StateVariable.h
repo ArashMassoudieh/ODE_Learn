@@ -12,6 +12,7 @@ class StateVariable : public Object
         StateVariable(const StateVariable& other);
         StateVariable& operator=(const StateVariable& other);
         double CalcRateOfChange();
+        void Renew();
     protected:
 
     private:

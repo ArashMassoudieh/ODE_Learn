@@ -5,10 +5,59 @@
 #include "ControlParameter.h"
 #include "ExternalForcing.h"
 #include <vector>
+#include "Vector_arma.h"
+#include "BTCSet.h"
 
 using namespace std;
 
 enum class object_type {state, control, exforce, not_found};
+
+struct solversettings
+{
+    double C_N_weight; //Crank-Nicholson Weight
+    double NRtolerance = 1e-6; //Newton Raphson Tolerance
+    double NR_coeff_reduction_factor = 0.8; //The coefficient to reduce the Newton-Raphson coefficient
+    double NR_timestep_reduction_factor = 0.75;
+    double NR_timestep_reduction_factor_fail = 0.3;
+    double minimum_timestep = 1e-7;
+    int NR_niteration_lower=20;
+    int NR_niteration_upper=40;
+    int NR_niteration_max=100;
+    bool makeresultsuniform = false;
+};
+
+struct outputs
+{
+    CBTCSet AllOutputs;
+    CBTCSet ObservedOutputs;
+};
+
+struct solvertemporaryvars
+{
+    CMatrix_arma Inverse_Jacobian;
+    double NR_coefficient = 1;
+    bool updatejacobian = true;
+    int numiterations;
+    int epoch_count=0;
+    string fail_reason;
+    double t;
+    double dt;
+    double dt_base;
+};
+
+struct simulationparameters
+{
+    double tstart = 0; //start time of simulation
+    double tend = 1; //end time of simulation
+    double dt0 = 0.01; // initial time-step size
+};
+
+struct _directories
+{
+    string inputpath;
+    string outputpath;
+};
+
 
 class System
 {
@@ -26,13 +75,19 @@ class System
         bool AppendState(const StateVariable &stt);
         bool AppendControlParameter(const ControlParameter &ctr);
         bool AppendExternalForcing(const ExternalForcing &extforce);
+        bool OneStepSolve(double dt);
     protected:
 
     private:
         vector<StateVariable> statevariables;
         vector<ControlParameter> controlparameters;
         vector<ExternalForcing> externalforcings;
-
+        CVector_arma GetStateVariables(Expression::timing tmg);
+        CVector_arma GetResiduals(CVector_arma &X);
+        bool Renew();
+        void SetStateVariables(CVector_arma &X,Expression::timing tmg = Expression::timing::present);
+        solvertemporaryvars SolverTempVars;
+        solversettings SolverSettings;
 };
 
 #endif // SYSTEM_H

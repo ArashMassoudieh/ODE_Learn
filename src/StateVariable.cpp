@@ -21,3 +21,8 @@ StateVariable& StateVariable::operator=(const StateVariable& rhs)
     Object::operator=(rhs);
     return *this;
 }
+
+void StateVariable::Renew()
+{
+    SetValue(GetValue(Expression::timing::present),Expression::timing::past);
+}

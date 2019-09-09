@@ -4,6 +4,7 @@
 #include "StateVariable.h"
 #include "ControlParameter.h"
 #include "ExternalForcing.h"
+#include "Parameter.h"
 #include <vector>
 #include "Vector_arma.h"
 #include "BTCSet.h"
@@ -11,7 +12,7 @@
 
 using namespace std;
 
-enum class object_type {state, control, exforce, not_found};
+enum class object_type {state, control, exforce, parameter, not_found};
 
 struct solversettings
 {
@@ -71,21 +72,29 @@ class System
         StateVariable *state(const string &s);
         ControlParameter *control(const string &s);
         ExternalForcing *exforce(const string &s);
+        Parameter *parameter(const string &s);
         double GetValue(const string &param, Expression::timing tmg=Expression::timing::present);
         object_type GetType(const string &param);
         bool AppendState(const StateVariable &stt);
         bool AppendControlParameter(const ControlParameter &ctr);
         bool AppendExternalForcing(const ExternalForcing &extforce);
+        bool AppendParameter(const Parameter &param);
         bool OneStepSolve(double dt);
         double dt() {return SolverTempVars.dt;}
         bool SetProp(const string &s, const double &val);
         ErrorHandler errorhandler;
+        outputs Outputs;
+        bool Solve();
+        void ShowMessage(const string &msg);
     protected:
 
     private:
+        void InitiateOutputs();
+        void PopulateOutputs();
         vector<StateVariable> statevariables;
         vector<ControlParameter> controlparameters;
         vector<ExternalForcing> externalforcings;
+        vector<Parameter> parameters;
         CVector_arma GetStateVariables(Expression::timing tmg);
         CVector_arma GetResiduals(CVector_arma &X);
         bool Renew();
@@ -95,6 +104,8 @@ class System
         simulationparameters SimulationParameters;
         CMatrix_arma Jacobian(CVector_arma &X);
         CVector_arma Jacobian(CVector_arma &V, CVector_arma &F0, int i);
+        bool Update();
+
 };
 
 #endif // SYSTEM_H

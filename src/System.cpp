@@ -40,6 +40,10 @@ Object* System::object(const string &s)
         if (controlparameters[i].GetName() == s)
             return &controlparameters[i];
 
+    for (int i=0; i<controlparameters.size(); i++)
+        if (parameters[i].GetName() == s)
+            return &parameters[i];
+
     return nullptr;
 }
 
@@ -56,6 +60,10 @@ object_type System::GetType(const string &param)
     for (int i=0; i<controlparameters.size(); i++)
         if (controlparameters[i].GetName() == param)
             return object_type::control;
+
+    for (int i=0; i<parameters.size(); i++)
+        if (parameters[i].GetName() == param)
+            return object_type::parameter;
 
     return object_type::not_found;
 }
@@ -86,6 +94,14 @@ ExternalForcing* System::exforce(const string &s)
     return nullptr;
 }
 
+Parameter* System::parameter(const string &s)
+{
+    for (int i=0; i<parameters.size(); i++)
+        if (parameters[i].GetName() == s)
+            return &parameters[i];
+    return nullptr;
+}
+
 double System::GetValue(const string &param, Expression::timing tmg)
 {
     if (GetType(param) == object_type::state)
@@ -96,6 +112,9 @@ double System::GetValue(const string &param, Expression::timing tmg)
 
     if (GetType(param) == object_type::exforce)
         return exforce(param)->Object::GetValue(tmg);
+
+    if (GetType(param) == object_type::parameter)
+        return parameter(param)->Object::GetValue(tmg);
 }
 
 bool System::AppendState(const StateVariable &stt)
@@ -143,6 +162,22 @@ bool System::AppendExternalForcing(const ExternalForcing &extforce)
         return true;
     }
 }
+
+bool System::AppendParameter(const Parameter &param)
+{
+    if (object(param.GetName())!=nullptr)
+    {
+        cout<<"Object '" + param.GetName() + "' already exists!";
+        return false;
+    }
+    else
+    {
+        parameters.push_back(param);
+        parameter(param.GetName())->SetParent(this);
+        return true;
+    }
+}
+
 
 bool System::OneStepSolve(double dt)
 {
@@ -311,5 +346,106 @@ bool System::SetProp(const string &s, const double &val)
     return false;
 }
 
+void System::InitiateOutputs()
+{
+    Outputs.AllOutputs.clear();
+
+    for (int i=0; i<statevariables.size(); i++)
+        Outputs.AllOutputs.append(CBTC(), statevariables[i].GetName());
+
+    for (int i=0; i<controlparameters.size(); i++)
+        Outputs.AllOutputs.append(CBTC(), controlparameters[i].GetName());
+
+    for (int i=0; i<externalforcings.size(); i++)
+        Outputs.AllOutputs.append(CBTC(), externalforcings[i].GetName());
+
+}
+
+
+void System::PopulateOutputs()
+{
+    for (int i=0; i<statevariables.size(); i++)
+        Outputs.AllOutputs[statevariables[i].GetName()].append(statevariables[i].GetValue());
+
+    for (int i=0; i<controlparameters.size(); i++)
+        Outputs.AllOutputs[controlparameters[i].GetName()].append(controlparameters[i].GetValue());
+
+    for (int i=0; i<externalforcings.size(); i++)
+        Outputs.AllOutputs[externalforcings[i].GetName()].append(externalforcings[i].Object::GetValue());
+}
+
+bool System::Solve()
+{
+    #ifdef QT_version
+    if (LogWindow())
+    {
+        LogWindow()->append("Simulation started!");
+    }
+    #else
+        ShowMessage("Simulation started!");
+    #endif
+
+    InitiateOutputs();
+    PopulateOutputs();
+
+    SolverTempVars.dt_base = SimulationParameters.dt0;
+    SolverTempVars.dt = SolverTempVars.dt_base;
+    SolverTempVars.t = SimulationParameters.tstart;
+
+    while (SolverTempVars.t<SimulationParameters.tend+SolverTempVars.dt)
+    {
+        SolverTempVars.dt = min(SolverTempVars.dt_base,GetMinimumNextTimeStepSize());
+        if (SolverTempVars.dt<SimulationParameters.dt0/100) SolverTempVars.dt=SimulationParameters.dt0/100;
+        #ifdef Debug_mode
+        ShowMessage(string("t = ") + numbertostring(SolverTempVars.t) + ", dt_base = " + numbertostring(SolverTempVars.dt_base) + ", dt = " + numbertostring(SolverTempVars.dt) + ", SolverTempVars.numiterations =" + numbertostring(SolverTempVars.numiterations));
+        #endif // Debug_mode
+        #ifdef QT_version
+        if (rtw)
+        {
+            updateProgress(false);
+        }
+        #endif
+
+        bool success = OneStepSolve(SolverTempVars.dt);
+        if (!success)
+        {
+            #ifdef Debug_mode
+            ShowMessage("failed!");
+            #endif // Debug_mode
+            SolverTempVars.dt_base *= SolverSettings.NR_timestep_reduction_factor_fail;
+            SolverTempVars.updatejacobian = true;
+        }
+        else
+        {
+            SolverTempVars.t += SolverTempVars.dt;
+            if (SolverTempVars.numiterations>SolverSettings.NR_niteration_upper)
+            {
+                SolverTempVars.dt_base = max(SolverTempVars.dt*SolverSettings.NR_timestep_reduction_factor,SolverSettings.minimum_timestep);
+                SolverTempVars.updatejacobian = true;
+            }
+            if (SolverTempVars.numiterations<SolverSettings.NR_niteration_lower)
+                SolverTempVars.dt_base = min(SolverTempVars.dt_base/SolverSettings.NR_timestep_reduction_factor,SimulationParameters.dt0*10);
+            PopulateOutputs();
+            Update();
+            //UpdateObjectiveFunctions(SolverTempVars.t);
+        }
+
+    }
+
+    ShowMessage("Simulation finished!");
+
+    return true;
+}
+
+bool System::Update()
+{
+	bool out = true;
+	for (unsigned int i = 0; i < externalforcings.size(); i++)
+		externalforcings[i].UpdateValue(SolverTempVars.t);
+
+	return out;
+}
+
+void System::ShowMessage(const string &msg) {cout<<msg<<endl;}
 
 

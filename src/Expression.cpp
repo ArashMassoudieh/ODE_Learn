@@ -160,6 +160,11 @@ Expression::Expression(const string &_S, System *sys)
                 param_constant_expression = "control";
                 parameter = S;
             }
+            else if (sys->parameter(S))
+            {
+                param_constant_expression = "parameter";
+                parameter = S;
+            }
             else
             {
                 cout<<"Variable '" + S + "' was not found";
@@ -288,7 +293,7 @@ double Expression::calc(System *S, const timing &tmg, bool limit)
 
 	if (param_constant_expression == "constant")
 		return constant;
-	if (param_constant_expression == "state" || param_constant_expression == "exforce" || param_constant_expression == "control")
+	if (param_constant_expression == "state" || param_constant_expression == "exforce" || param_constant_expression == "control" || param_constant_expression == "parameter")
 	{
 		return S->GetValue(parameter,tmg);
 	}
@@ -302,6 +307,9 @@ double Expression::calc(System *S, const timing &tmg, bool limit)
 		}
 		term_vals.resize(terms.size());
 		for (unsigned int i = 0; i < terms.size(); i++) terms_calculated.push_back(false);
+
+		if (operators.size()==0)
+            term_vals[0] = terms[0].calc(S,tmg,limit);
 
 		for (int i = operators.size() - 1; i >= 0; i--)
 		{

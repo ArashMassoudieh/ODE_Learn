@@ -37,6 +37,7 @@ class Object
             }
         }
         void SetParent(System *system);
+        System* Parent() {return parent;}
     protected:
 
     private:

@@ -7,6 +7,7 @@
 #include <vector>
 #include "Vector_arma.h"
 #include "BTCSet.h"
+#include "ErrorHandler.h"
 
 using namespace std;
 
@@ -76,6 +77,9 @@ class System
         bool AppendControlParameter(const ControlParameter &ctr);
         bool AppendExternalForcing(const ExternalForcing &extforce);
         bool OneStepSolve(double dt);
+        double dt() {return SolverTempVars.dt;}
+        bool SetProp(const string &s, const double &val);
+        ErrorHandler errorhandler;
     protected:
 
     private:
@@ -88,6 +92,9 @@ class System
         void SetStateVariables(CVector_arma &X,Expression::timing tmg = Expression::timing::present);
         solvertemporaryvars SolverTempVars;
         solversettings SolverSettings;
+        simulationparameters SimulationParameters;
+        CMatrix_arma Jacobian(CVector_arma &X);
+        CVector_arma Jacobian(CVector_arma &V, CVector_arma &F0, int i);
 };
 
 #endif // SYSTEM_H

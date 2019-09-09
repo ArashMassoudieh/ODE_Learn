@@ -170,7 +170,7 @@ bool System::OneStepSolve(double dt)
                 SolverTempVars.NR_coefficient = 1;
             }
             X = X - SolverTempVars.NR_coefficient*SolverTempVars.Inverse_Jacobian*F;
-            F = GetResiduals(variable, X);
+            F = GetResiduals(X);
             err_p = err;
             err = F.norm2();
             #ifdef Debug_mode
@@ -184,21 +184,6 @@ bool System::OneStepSolve(double dt)
                 return false;
         }
         switchvartonegpos = false;
-        for (unsigned int i=0; i<blocks.size(); i++)
-        {
-            if (X[i]<-1e-13 && !blocks[i].GetLimitedOutflow())
-            {
-                blocks[i].SetLimitedOutflow(true);
-                switchvartonegpos = true;
-                SolverTempVars.updatejacobian = true;
-            }
-            else if (X[i]>1 && blocks[i].GetLimitedOutflow())
-            {
-                blocks[i].SetLimitedOutflow(false);
-                switchvartonegpos = true;
-                SolverTempVars.updatejacobian = true;
-            }
-        }
     }
 
 	#ifdef Debug_mode
@@ -223,9 +208,9 @@ CVector_arma System::GetStateVariables(Expression::timing tmg)
     for (unsigned int i = 0; i < statevariables.size(); i++)
     {
         if (tmg == Expression::timing::past)
-            out.append(statevariables[i].value_past);
+            out.append(statevariables[i].GetValue(Expression::timing::past));
         else
-            out.append(statevariables[i].value_current);
+            out.append(statevariables[i].GetValue(Expression::timing::present));
     }
     return out;
 }
@@ -235,45 +220,96 @@ void System::SetStateVariables(CVector_arma &X,Expression::timing tmg)
     for (unsigned int i = 0; i < statevariables.size(); i++)
     {
         if (tmg == Expression::timing::past)
-            statevariables[i].value_past = X[i];
+            statevariables[i].SetValue(X[i], Expression::timing::past);
         else
-            statevariables[i].value_current = X[i];
+            statevariables[i].SetValue(X[i],Expression::timing::present);
     }
-    return out;
+
 }
 
 CVector_arma System::GetResiduals(CVector_arma &X)
 {
     CVector_arma F(statevariables.size());
     SetStateVariables(X,Expression::timing::present);
-    CalculateFlows(Variable(variable)->GetCorrespondingFlowVar(),Expression::timing::present);
 
-    for (unsigned int i=0; i<blocks.size(); i++)
+    for (unsigned int i=0; i<statevariables.size(); i++)
     {
-        if (blocks[i].GetLimitedOutflow())
-        {
-            blocks[i].SetOutflowLimitFactor(X[i]);
-            blocks[i].SetVal(variable,0);
-            F[i] = (0-blocks[i].GetVal(variable,Expression::timing::past))/dt() - blocks[i].GetInflowValue(variable,Expression::timing::present);
-        }
-        else
-            F[i] = (X[i]-blocks[i].GetVal(variable,Expression::timing::past))/dt() - blocks[i].GetInflowValue(variable,Expression::timing::present);
+            F[i] = (X[i]-statevariables[i].GetValue(Expression::timing::past))/dt() - statevariables[i].GetRateOfChange(Expression::timing::present);
     }
 
-
-    for (unsigned int i=0; i<links.size(); i++)
-    {
-        if (blocks[links[i].s_Block_No()].GetLimitedOutflow() && links[i].GetVal(blocks[links[i].s_Block_No()].Variable(variable)->GetCorrespondingFlowVar(),Expression::timing::present)>0)
-            links[i].SetOutflowLimitFactor(blocks[links[i].s_Block_No()].GetOutflowLimitFactor());
-        if (blocks[links[i].e_Block_No()].GetLimitedOutflow() && links[i].GetVal(blocks[links[i].e_Block_No()].Variable(variable)->GetCorrespondingFlowVar(),Expression::timing::present)<0)
-            links[i].SetOutflowLimitFactor(blocks[links[i].e_Block_No()].GetOutflowLimitFactor());
-
-    }
-
-    for (unsigned int i=0; i<links.size(); i++)
-    {
-        F[links[i].s_Block_No()] += links[i].GetVal(blocks[links[i].s_Block_No()].Variable(variable)->GetCorrespondingFlowVar(),Expression::timing::present)*links[i].GetOutflowLimitFactor();
-        F[links[i].e_Block_No()] -= links[i].GetVal(blocks[links[i].s_Block_No()].Variable(variable)->GetCorrespondingFlowVar(),Expression::timing::present)*links[i].GetOutflowLimitFactor();
-    }
     return F;
 }
+
+CMatrix_arma System::Jacobian(CVector_arma &X)
+{
+    CMatrix_arma M(X.num);
+
+    CVector_arma F0 = GetResiduals(X);
+    for (int i=0; i < X.num; i++)
+    {
+        CVector_arma V = Jacobian(X, F0, i);
+        for (int j=0; j<X.num; j++)
+            M(i,j) = V[j];
+    }
+
+  return Transpose(M);
+}
+
+
+CVector_arma System::Jacobian(CVector_arma &V, CVector_arma &F0, int i)
+{
+  double epsilon;
+  epsilon = -1e-6;
+  CVector_arma V1(V);
+  V1[i] += epsilon;
+  CVector_arma F1;
+  F1 = GetResiduals(V1);
+  CVector_arma grad = (F1 - F0) / epsilon;
+  if (grad.norm2() == 0)
+  {
+    epsilon = 1e-6;
+    V1 = V;
+    V1[i] += epsilon;
+    F1 = GetResiduals(V1);
+    grad = (F1 - F0) / epsilon;
+  }
+  return grad;
+
+}
+
+bool System::SetProp(const string &s, const double &val)
+{
+    if (s=="cn_weight")
+    {   SolverSettings.C_N_weight = val; return true;}
+    if (s=="nr_tolerance")
+    {   SolverSettings.NRtolerance = val; return true;}
+    if (s=="nr_coeff_reduction_factor")
+    {   SolverSettings.NR_coeff_reduction_factor = val; return true;}
+    if (s=="nr_timestep_reduction_factor")
+    {   SolverSettings.NR_timestep_reduction_factor = val; return true;}
+    if (s=="nr_timestep_reduction_factor_fail")
+    {   SolverSettings.NR_timestep_reduction_factor_fail = val; return true;}
+    if (s=="minimum_timestep")
+    {   SolverSettings.minimum_timestep = val; return true;}
+    if (s=="nr_niteration_lower")
+    {   SolverSettings.NR_niteration_lower=int(val); return true;}
+    if (s=="nr_niteration_upper")
+    {   SolverSettings.NR_niteration_upper=int(val); return true;}
+    if (s=="nr_niteration_max")
+    {   SolverSettings.NR_niteration_max=int(val); return true;}
+    if (s=="make_results_uniform")
+    {   SolverSettings.makeresultsuniform = bool(val); return true;}
+
+    if (s=="tstart")
+    {   SimulationParameters.tstart = val; return true;}
+    if (s=="tend")
+    {   SimulationParameters.tend = val; return true;}
+    if (s=="tend")
+    {   SimulationParameters.dt0 = val; return true;}
+
+    errorhandler.Append("","System","SetProp","Property '" + s + "' was not found!", 621);
+    return false;
+}
+
+
+

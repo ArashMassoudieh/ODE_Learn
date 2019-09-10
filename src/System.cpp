@@ -198,10 +198,10 @@ bool System::AppendParameter(const Parameter &param)
 
 bool System::OneStepSolve(double dt)
 {
+    CVector_arma X_past = GetStateVariables(Expression::timing::past);
     Renew();
 
     CVector_arma X = GetStateVariables(Expression::timing::past);
-    CVector_arma X_past = X;
     CVector_arma F = GetResiduals(X);
 
     double err_ini = F.norm2();
@@ -231,11 +231,17 @@ bool System::OneStepSolve(double dt)
                 ShowMessage(numbertostring(err));
             #endif // Debug_mode
             if (err>err_p)
+            {
                 SolverTempVars.NR_coefficient*=SolverSettings.NR_coeff_reduction_factor;
-            //else
+                X = X_past;
+                F = GetResiduals(X);
+            }                //else
             //    SolverTempVars.NR_coefficient/=SolverSettings.NR_coeff_reduction_factor;
             if (SolverTempVars.numiterations>SolverSettings.NR_niteration_max)
+            {
+                SetStateVariables(X_past,Expression::timing::past);
                 return false;
+            }
         }
         switchvartonegpos = false;
     }
@@ -384,13 +390,13 @@ void System::InitiateOutputs()
 void System::PopulateOutputs()
 {
     for (int i=0; i<statevariables.size(); i++)
-        Outputs.AllOutputs[statevariables[i].GetName()].append(statevariables[i].GetValue());
+        Outputs.AllOutputs[statevariables[i].GetName()].append(SolverTempVars.t,statevariables[i].GetValue());
 
     for (int i=0; i<controlparameters.size(); i++)
-        Outputs.AllOutputs[controlparameters[i].GetName()].append(controlparameters[i].GetValue());
+        Outputs.AllOutputs[controlparameters[i].GetName()].append(SolverTempVars.t,controlparameters[i].GetValue());
 
     for (int i=0; i<externalforcings.size(); i++)
-        Outputs.AllOutputs[externalforcings[i].GetName()].append(externalforcings[i].Object::GetValue());
+        Outputs.AllOutputs[externalforcings[i].GetName()].append(SolverTempVars.t,externalforcings[i].Object::GetValue());
 }
 
 bool System::Solve()
@@ -415,6 +421,7 @@ bool System::Solve()
     {
         SolverTempVars.dt = min(SolverTempVars.dt_base,GetMinimumNextTimeStepSize());
         if (SolverTempVars.dt<SimulationParameters.dt0/100) SolverTempVars.dt=SimulationParameters.dt0/100;
+        ShowMessage(string("t = ") + numbertostring(SolverTempVars.t));
         #ifdef Debug_mode
         ShowMessage(string("t = ") + numbertostring(SolverTempVars.t) + ", dt_base = " + numbertostring(SolverTempVars.dt_base) + ", dt = " + numbertostring(SolverTempVars.dt) + ", SolverTempVars.numiterations =" + numbertostring(SolverTempVars.numiterations));
         #endif // Debug_mode

@@ -13,6 +13,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-DDebug_mode" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -33,20 +34,38 @@
 			<Add option="-fexceptions" />
 			<Add directory="include" />
 		</Compiler>
+		<Linker>
+			<Add option="-larmadillo" />
+			<Add option="-llapack" />
+			<Add option="-lblas" />
+			<Add option="-lomp" />
+		</Linker>
 		<Unit filename="include/Command.h" />
 		<Unit filename="include/ControlParameter.h" />
+		<Unit filename="include/ErrorHandler.h" />
 		<Unit filename="include/Expression.h" />
 		<Unit filename="include/ExternalForcing.h" />
 		<Unit filename="include/Object.h" />
 		<Unit filename="include/StateVariable.h" />
 		<Unit filename="include/System.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="src/BTC.cpp" />
+		<Unit filename="src/BTCSet.cpp" />
 		<Unit filename="src/ControlParameter.cpp" />
+		<Unit filename="src/DistributionNUnif.cpp" />
+		<Unit filename="src/ErrorHandler.cpp" />
 		<Unit filename="src/Expression.cpp" />
 		<Unit filename="src/ExternalForcing.cpp" />
+		<Unit filename="src/Matrix.cpp" />
+		<Unit filename="src/Matrix_arma.cpp" />
+		<Unit filename="src/NormalDist.cpp" />
 		<Unit filename="src/Object.cpp" />
+		<Unit filename="src/Parameter.cpp" />
+		<Unit filename="src/QuickSort.cpp" />
 		<Unit filename="src/StateVariable.cpp" />
 		<Unit filename="src/System.cpp" />
+		<Unit filename="src/Vector.cpp" />
+		<Unit filename="src/Vector_arma.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

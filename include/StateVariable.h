@@ -15,7 +15,11 @@ class StateVariable : public Object
         void Renew();
         bool SetRateOfChange(const Expression &exp) {rateofchange = exp;}
         Expression *RateOfChange() {return &rateofchange;}
-        double GetRateOfChange(Expression::timing tmg) {return rateofchange.calc(Parent(),tmg);}
+        double GetRateOfChange(Expression::timing tmg)
+        {
+            double out = rateofchange.calc(Parent(),tmg);
+            return out;
+        }
     protected:
 
     private:

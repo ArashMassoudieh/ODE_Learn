@@ -34,5 +34,10 @@ int main()
 
     cout<<preyrateofchange.calc(&sys,Expression::timing::past)<<endl;
     cout<<predatorrateofchange.calc(&sys,Expression::timing::past)<<endl;
+    sys.SetProp("tstart",0);
+    sys.SetProp("tend",400);
+    sys.SetProp("dt",0.01);
+    sys.Solve();
+    sys.Outputs.AllOutputs.writetofile("Output.txt",true);
     return 0;
 }

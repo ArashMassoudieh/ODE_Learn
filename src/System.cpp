@@ -40,12 +40,29 @@ Object* System::object(const string &s)
         if (controlparameters[i].GetName() == s)
             return &controlparameters[i];
 
-    for (int i=0; i<controlparameters.size(); i++)
+    for (int i=0; i<parameters.size(); i++)
         if (parameters[i].GetName() == s)
             return &parameters[i];
 
     return nullptr;
 }
+
+void System::SetAllParents()
+{
+    for (int i=0; i<statevariables.size(); i++)
+        statevariables[i].SetParent(this);
+
+    for (int i=0; i<externalforcings.size(); i++)
+        externalforcings[i].SetParent(this);
+
+    for (int i=0; i<controlparameters.size(); i++)
+        controlparameters[i].SetParent(this);
+
+    for (int i=0; i<parameters.size(); i++)
+        parameters[i].SetParent(this);
+
+}
+
 
 object_type System::GetType(const string &param)
 {
@@ -200,7 +217,8 @@ bool System::OneStepSolve(double dt)
             SolverTempVars.numiterations++;
             if (SolverTempVars.updatejacobian)
             {
-                SolverTempVars.Inverse_Jacobian = Invert(Jacobian(X));
+                CMatrix_arma M = Jacobian(X);
+                SolverTempVars.Inverse_Jacobian = Invert(M);
                 SolverTempVars.updatejacobian = false;
                 SolverTempVars.NR_coefficient = 1;
             }
@@ -208,8 +226,9 @@ bool System::OneStepSolve(double dt)
             F = GetResiduals(X);
             err_p = err;
             err = F.norm2();
+
             #ifdef Debug_mode
-            //ShowMessage(numbertostring(err));
+                ShowMessage(numbertostring(err));
             #endif // Debug_mode
             if (err>err_p)
                 SolverTempVars.NR_coefficient*=SolverSettings.NR_coeff_reduction_factor;
@@ -284,7 +303,7 @@ CMatrix_arma System::Jacobian(CVector_arma &X)
     {
         CVector_arma V = Jacobian(X, F0, i);
         for (int j=0; j<X.num; j++)
-            M(i,j) = V[j];
+            M[i][j] = V[j];
     }
 
   return Transpose(M);
@@ -384,10 +403,10 @@ bool System::Solve()
     #else
         ShowMessage("Simulation started!");
     #endif
-
+    SetAllParents();
     InitiateOutputs();
     PopulateOutputs();
-
+    PrepareTimeSeries();
     SolverTempVars.dt_base = SimulationParameters.dt0;
     SolverTempVars.dt = SolverTempVars.dt_base;
     SolverTempVars.t = SimulationParameters.tstart;
@@ -425,6 +444,7 @@ bool System::Solve()
             }
             if (SolverTempVars.numiterations<SolverSettings.NR_niteration_lower)
                 SolverTempVars.dt_base = min(SolverTempVars.dt_base/SolverSettings.NR_timestep_reduction_factor,SimulationParameters.dt0*10);
+            ShowMessage("t = " + numbertostring(SolverTempVars.t));
             PopulateOutputs();
             Update();
             //UpdateObjectiveFunctions(SolverTempVars.t);
@@ -448,4 +468,21 @@ bool System::Update()
 
 void System::ShowMessage(const string &msg) {cout<<msg<<endl;}
 
+double System::GetMinimumNextTimeStepSize()
+{
+    double x=1e12;
 
+    for (int i=0; i<externalforcings.size(); i++)
+    {
+        x = min(x,externalforcings[i].TimeSeries()->interpol_D(this->SolverTempVars.t));
+    }
+    return x;
+}
+
+void System::PrepareTimeSeries()
+{
+    for (int i=0; i<externalforcings.size();i++)
+    {
+        externalforcings[i].TimeSeries()->assign_D();
+    }
+}

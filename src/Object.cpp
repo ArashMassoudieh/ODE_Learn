@@ -15,6 +15,7 @@ Object::Object(const Object& other)
     name = other.name;
     value_current = other.value_current;
     value_past = other.value_past;
+    parent = other.parent;
 
 }
 
@@ -24,7 +25,7 @@ Object& Object::operator=(const Object& rhs)
     name = rhs.name;
     value_current = rhs.value_current;
     value_past = rhs.value_past;
-
+    parent = rhs.parent;
     //assignment operator
     return *this;
 }

@@ -9,6 +9,8 @@
 #include "Vector_arma.h"
 #include "BTCSet.h"
 #include "ErrorHandler.h"
+#define CVector_arma CVector
+#define CMatrix_arma CMatrix
 
 using namespace std;
 
@@ -91,6 +93,8 @@ class System
     private:
         void InitiateOutputs();
         void PopulateOutputs();
+        void PrepareTimeSeries();
+        void SetAllParents();
         vector<StateVariable> statevariables;
         vector<ControlParameter> controlparameters;
         vector<ExternalForcing> externalforcings;
@@ -105,7 +109,7 @@ class System
         CMatrix_arma Jacobian(CVector_arma &X);
         CVector_arma Jacobian(CVector_arma &V, CVector_arma &F0, int i);
         bool Update();
-
+        double GetMinimumNextTimeStepSize();
 };
 
 #endif // SYSTEM_H

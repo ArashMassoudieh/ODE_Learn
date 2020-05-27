@@ -13,7 +13,6 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-DDebug_mode" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -40,9 +39,10 @@
 			<Add option="-lblas" />
 			<Add option="-lomp" />
 		</Linker>
+		<Unit filename="include/BTC.h" />
+		<Unit filename="include/BTCSet.h" />
 		<Unit filename="include/Command.h" />
 		<Unit filename="include/ControlParameter.h" />
-		<Unit filename="include/ErrorHandler.h" />
 		<Unit filename="include/Expression.h" />
 		<Unit filename="include/ExternalForcing.h" />
 		<Unit filename="include/Object.h" />
@@ -53,14 +53,12 @@
 		<Unit filename="src/BTCSet.cpp" />
 		<Unit filename="src/ControlParameter.cpp" />
 		<Unit filename="src/DistributionNUnif.cpp" />
-		<Unit filename="src/ErrorHandler.cpp" />
 		<Unit filename="src/Expression.cpp" />
 		<Unit filename="src/ExternalForcing.cpp" />
 		<Unit filename="src/Matrix.cpp" />
 		<Unit filename="src/Matrix_arma.cpp" />
 		<Unit filename="src/NormalDist.cpp" />
 		<Unit filename="src/Object.cpp" />
-		<Unit filename="src/Parameter.cpp" />
 		<Unit filename="src/QuickSort.cpp" />
 		<Unit filename="src/StateVariable.cpp" />
 		<Unit filename="src/System.cpp" />

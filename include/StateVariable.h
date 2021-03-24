@@ -13,7 +13,7 @@ class StateVariable : public Object
         StateVariable& operator=(const StateVariable& other);
         double CalcRateOfChange();
         void Renew();
-        bool SetRateOfChange(const Expression &exp) {rateofchange = exp;}
+        bool SetRateOfChange(const Expression &exp) {rateofchange = exp;return true;}
         Expression *RateOfChange() {return &rateofchange;}
         double GetRateOfChange(Expression::timing tmg)
         {

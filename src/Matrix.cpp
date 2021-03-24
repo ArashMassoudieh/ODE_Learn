@@ -748,7 +748,7 @@ CVector solve_ar(CMatrix &M, CVector &V)
 	mat C;
 	try {
 		C = solve(A,B);
-		throw 0;
+		//throw 0;
 	}
 
 	catch(int rtt)

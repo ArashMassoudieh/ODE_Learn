@@ -19,6 +19,7 @@ StateVariable& StateVariable::operator=(const StateVariable& rhs)
 {
     if (this == &rhs) return *this; // handle self assignment
     Object::operator=(rhs);
+    rateofchange = rhs.rateofchange;
     return *this;
 }
 

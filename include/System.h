@@ -9,8 +9,10 @@
 #include "Vector_arma.h"
 #include "BTCSet.h"
 #include "ErrorHandler.h"
+#include "dlib_wrapper.h"
 #define CVector_arma CVector
 #define CMatrix_arma CMatrix
+
 
 using namespace std;
 

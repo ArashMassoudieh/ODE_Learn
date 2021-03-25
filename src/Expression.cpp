@@ -62,16 +62,18 @@ Expression::Expression(const string &_S, System *sys)
 	vector<string> out;
 	//bool inside_quote = false;
 	unsigned int paranthesis_level = 0;
-	unsigned int last_operator_location = -1;
+	int last_operator_location = -1;
 	if (!parantheses_balance(S))
 	{
 		_errors.push_back("Parentheses do not match in" + S);
 		return;
 	}
-	if (lookup(funcs,left(S,4))!=-1)
+	if (lookup(funcs, left(S,4))!=-1 )
 	{
-		function = right(left(S,4),3);
-		S = right(S, S.size() - 4);
+        if (corresponding_parenthesis(S,4) == int(S.size()-1))
+        {   function = right(left(S,4),3);
+            S = right(S, S.size() - 4);
+        }
 	}
 	if (left(S,1) == "(")
 	{
@@ -87,7 +89,7 @@ Expression::Expression(const string &_S, System *sys)
 			//	terms.append(CExpression("0"));
 			if (lookup(funcs,left(S,4))!=-1)
 			{
-				function = right(left(S,4),3);
+				//function = right(left(S,4),3);
 			}
 
 		}
@@ -111,7 +113,7 @@ Expression::Expression(const string &_S, System *sys)
 					paranthesis_level--;
 
 				if (paranthesis_level == 0)
-					if ((S.substr(i, 1) == "+") || (S.substr(i, 1) == "-") || (S.substr(i, 1) == "*") || (S.substr(i, 1) == "/") || (S.substr(i, 1) == "^"))
+					if ((S.substr(i, 1) == "+") || (S.substr(i, 1) == "-") || (S.substr(i, 1) == "*") || (S.substr(i, 1) == "/") || (S.substr(i, 1) == "^") || S.substr(i,1) == ";")
 					{
 						operators.push_back(S.substr(i, 1));
 						Expression sub_exp = Expression(trim(S.substr(last_operator_location+1, i -1- last_operator_location)),sys);

@@ -28,3 +28,5 @@ bool Reward::SetReward(const Expression &exp)
     reward_value=exp;
     return true;
 }
+
+

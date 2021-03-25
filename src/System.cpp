@@ -44,6 +44,10 @@ Object* System::object(const string &s)
         if (parameters[i].GetName() == s)
             return &parameters[i];
 
+    for (int i=0; i<rewards.size(); i++)
+        if (rewards[i].GetName() == s)
+            return &rewards[i];
+
     return nullptr;
 }
 
@@ -60,6 +64,9 @@ void System::SetAllParents()
 
     for (int i=0; i<parameters.size(); i++)
         parameters[i].SetParent(this);
+
+    for (int i=0; i<rewards.size(); i++)
+        rewards[i].SetParent(this);
 
 }
 
@@ -81,6 +88,10 @@ object_type System::GetType(const string &param)
     for (int i=0; i<parameters.size(); i++)
         if (parameters[i].GetName() == param)
             return object_type::parameter;
+
+    for (int i=0; i<rewards.size(); i++)
+        if (rewards[i].GetName() == param)
+            return object_type::reward;
 
     return object_type::not_found;
 }
@@ -119,6 +130,14 @@ Parameter* System::parameter(const string &s)
     return nullptr;
 }
 
+Reward* System::reward(const string &s)
+{
+    for (int i=0; i<rewards.size(); i++)
+        if (rewards[i].GetName() == s)
+            return &rewards[i];
+    return nullptr;
+}
+
 double System::GetValue(const string &param, Expression::timing tmg)
 {
     if (GetType(param) == object_type::state)
@@ -132,6 +151,9 @@ double System::GetValue(const string &param, Expression::timing tmg)
 
     if (GetType(param) == object_type::parameter)
         return parameter(param)->Object::GetValue(tmg);
+
+    if (GetType(param) == object_type::reward)
+        return reward(param)->Object::GetValue(tmg);
 }
 
 bool System::AppendState(const StateVariable &stt)
@@ -145,6 +167,22 @@ bool System::AppendState(const StateVariable &stt)
     {
         statevariables.push_back(stt);
         state(stt.GetName())->SetParent(this);
+        return true;
+    }
+
+}
+
+bool System::AppendReward(const Reward &rwd)
+{
+    if (object(rwd.GetName())!=nullptr)
+    {
+        cout<<"Object '" + rwd.GetName() + "' already exists!";
+        return false;
+    }
+    else
+    {
+        rewards.push_back(rwd);
+        reward(rwd.GetName())->SetParent(this);
         return true;
     }
 
@@ -384,6 +422,9 @@ void System::InitiateOutputs()
     for (int i=0; i<externalforcings.size(); i++)
         Outputs.AllOutputs.append(CBTC(), externalforcings[i].GetName());
 
+     for (int i=0; i<rewards.size(); i++)
+        Outputs.AllOutputs.append(CBTC(), rewards[i].GetName());
+
 }
 
 
@@ -397,6 +438,9 @@ void System::PopulateOutputs()
 
     for (int i=0; i<externalforcings.size(); i++)
         Outputs.AllOutputs[externalforcings[i].GetName()].append(SolverTempVars.t,externalforcings[i].Object::GetValue());
+
+    for (int i=0; i<rewards.size(); i++)
+        Outputs.AllOutputs[rewards[i].GetName()].append(SolverTempVars.t,rewards[i].GetReward());
 }
 
 bool System::Solve()

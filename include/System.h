@@ -5,6 +5,7 @@
 #include "ControlParameter.h"
 #include "ExternalForcing.h"
 #include "Parameter.h"
+#include "Reward.h"
 #include <vector>
 #include "Vector_arma.h"
 #include "BTCSet.h"
@@ -16,7 +17,7 @@
 
 using namespace std;
 
-enum class object_type {state, control, exforce, parameter, not_found};
+enum class object_type {state, control, exforce, parameter, reward, not_found};
 
 struct solversettings
 {
@@ -77,12 +78,14 @@ class System
         ControlParameter *control(const string &s);
         ExternalForcing *exforce(const string &s);
         Parameter *parameter(const string &s);
+        Reward *reward(const string &s);
         double GetValue(const string &param, Expression::timing tmg=Expression::timing::present);
         object_type GetType(const string &param);
         bool AppendState(const StateVariable &stt);
         bool AppendControlParameter(const ControlParameter &ctr);
         bool AppendExternalForcing(const ExternalForcing &extforce);
         bool AppendParameter(const Parameter &param);
+        bool AppendReward(const Reward &rwd);
         bool OneStepSolve(double dt);
         double dt() {return SolverTempVars.dt;}
         bool SetProp(const string &s, const double &val);
@@ -101,6 +104,7 @@ class System
         vector<ControlParameter> controlparameters;
         vector<ExternalForcing> externalforcings;
         vector<Parameter> parameters;
+        vector<Reward> rewards;
         CVector_arma GetStateVariables(Expression::timing tmg);
         CVector_arma GetResiduals(CVector_arma &X);
         bool Renew();

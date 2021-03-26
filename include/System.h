@@ -13,7 +13,13 @@
 #include "dlib_wrapper.h"
 #define CVector_arma CVector
 #define CMatrix_arma CMatrix
+#include "StateValuePairs.h"
 
+struct _RL_parameters
+{
+    double alpha = 0.05;
+    double gamma = 0.95;
+};
 
 using namespace std;
 
@@ -93,6 +99,8 @@ class System
         outputs Outputs;
         bool Solve();
         void ShowMessage(const string &msg);
+        _statevaluepair GetStateValuePair();
+        void UpdateValue();
     protected:
 
     private:
@@ -116,6 +124,11 @@ class System
         CVector_arma Jacobian(CVector_arma &V, CVector_arma &F0, int i);
         bool Update();
         double GetMinimumNextTimeStepSize();
+        double new_value=0;
+        double old_value=0;
+        double totalreward;
+        StateValuePairs StateValues;
+
 };
 
 #endif // SYSTEM_H

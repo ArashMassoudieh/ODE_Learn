@@ -16,13 +16,28 @@ System::~System()
 
 System::System(const System& other)
 {
-    //copy ctor
+    statevariables = other.statevariables;
+    externalforcings = other.externalforcings;
+    controlparameters = other.controlparameters;
+    parameters = other.parameters;
+    rewards = other.rewards;
+    SolverTempVars = other.SolverTempVars;
+    SolverSettings = other.SolverSettings;
+    SimulationParameters = other.SimulationParameters;
 }
 
 System& System::operator=(const System& rhs)
 {
     if (this == &rhs) return *this; // handle self assignment
-    //assignment operator
+    statevariables = rhs.statevariables;
+    externalforcings = rhs.externalforcings;
+    controlparameters = rhs.controlparameters;
+    parameters = rhs.parameters;
+    rewards = rhs.rewards;
+    SolverTempVars = rhs.SolverTempVars;
+    SolverSettings = rhs.SolverSettings;
+    SimulationParameters = rhs.SimulationParameters;
+
     return *this;
 }
 
@@ -409,6 +424,17 @@ bool System::SetProp(const string &s, const double &val)
     return false;
 }
 
+_statevaluepair System::GetStateValuePair()
+{
+
+}
+
+void System::UpdateValue()
+{
+
+}
+
+
 void System::InitiateOutputs()
 {
     Outputs.AllOutputs.clear();
@@ -439,8 +465,13 @@ void System::PopulateOutputs()
     for (int i=0; i<externalforcings.size(); i++)
         Outputs.AllOutputs[externalforcings[i].GetName()].append(SolverTempVars.t,externalforcings[i].Object::GetValue());
 
+    totalreward = 0;
     for (int i=0; i<rewards.size(); i++)
-        Outputs.AllOutputs[rewards[i].GetName()].append(SolverTempVars.t,rewards[i].GetReward());
+    {
+        double _reward=rewards[i].GetReward();
+        Outputs.AllOutputs[rewards[i].GetName()].append(SolverTempVars.t,_reward);
+        totalreward += _reward;
+    }
 }
 
 bool System::Solve()

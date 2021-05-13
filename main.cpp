@@ -5,7 +5,26 @@ using namespace std;
 
 int main()
 {
-    cout<<1<<endl;
+
+    StateValuePairs statevaluedata;
+
+    for (unsigned int i=0; i<10; i++)
+    {
+        for (unsigned int j=0; j<2; j++)
+        {
+            vector<double> x;
+            double xx = i*0.1;
+            double yy = j*0.5;
+            x.push_back(xx);
+            x.push_back(yy);
+            double val = 2*xx+0.4*yy;
+            statevaluedata.Append(x,val);
+        }
+
+    }
+
+    statevaluedata.Train_MLR();
+    cout<<"Coefficients:" << statevaluedata.GetCoefficientsAsString()<<endl;
     System sys;
     StateVariable Storage;
     Storage.SetName("Storage");

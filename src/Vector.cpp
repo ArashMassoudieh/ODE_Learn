@@ -7,6 +7,7 @@
 #include "Matrix.h"
 #include <cfloat>
 #include "Vector_arma.h"
+#include "Expression.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -671,6 +672,16 @@ vector<vector<double>> create_vector(int i, int j)
 		X[i].resize(j);
 
 	return X;
+
+}
+
+string CVector::toString()
+{
+    string s = "[" + numbertostring(vec[0]);
+    for (int i=1; i<num; i++)
+        s += "," + numbertostring(vec[i]);
+    s+= "]";
+    return s;
 
 }
 

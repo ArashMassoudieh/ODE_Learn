@@ -61,7 +61,6 @@ class StateValuePairs
         vector<_statevaluepair> statevalues;
         _trainmethod trainmethod;
         _regression_parameters regression_parameters;
-        dlib::mlp::kernel_1a_c netp;
 
 };
 

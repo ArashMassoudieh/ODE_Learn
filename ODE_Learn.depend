@@ -36,23 +36,23 @@
 	<string>
 	<vector>
 
-1616764033 source:/home/arash/Projects/ODE_Learn/src/System.cpp
+1628092186 source:/home/arash/Projects/ODE_Learn/src/System.cpp
 	"System.h"
 	<iostream>
 	"Vector_arma.h"
 	"Matrix_arma.h"
 
-1616764033 /home/arash/Projects/ODE_Learn/include/System.h
+1628091677 /home/arash/Projects/ODE_Learn/include/System.h
 	"StateVariable.h"
 	"ControlParameter.h"
 	"ExternalForcing.h"
 	"Parameter.h"
 	"Reward.h"
+	"DynamicValue.h"
 	<vector>
 	"Vector_arma.h"
 	"BTCSet.h"
 	"ErrorHandler.h"
-	"dlib_wrapper.h"
 	"StateValuePairs.h"
 
 1616709169 source:/home/arash/Projects/ODE_Learn/src/Expression.cpp
@@ -235,14 +235,31 @@
 	"Object.h"
 	"Expression.h"
 
-1616887084 /home/arash/Projects/ODE_Learn/include/StateValuePairs.h
+1628088263 /home/arash/Projects/ODE_Learn/include/StateValuePairs.h
 	<vector>
 	<iostream>
 	<string>
 	"dlib/mlp.h"
 
-1616855403 source:/home/arash/Projects/ODE_Learn/src/StateValuePairs.cpp
+1628088203 source:/home/arash/Projects/ODE_Learn/src/StateValuePairs.cpp
 	"StateValuePairs.h"
 	<gsl/gsl_multifit.h>
 	"Vector.h"
+
+1616678970 source:/home/arash/Projects/ODE_Learn/main_fish.cpp
+	<iostream>
+	"System.h"
+	<string>
+
+1628092468 source:/home/arash/Projects/ODE_Learn/main_simple.cpp
+	<iostream>
+	"System.h"
+	<string>
+
+1628091707 /home/arash/Projects/ODE_Learn/include/DynamicValue.h
+	"Object.h"
+	"Expression.h"
+
+1628091359 source:/home/arash/Projects/ODE_Learn/src/DynamicValue.cpp
+	"DynamicValue.h"
 

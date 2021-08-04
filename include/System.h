@@ -6,14 +6,15 @@
 #include "ExternalForcing.h"
 #include "Parameter.h"
 #include "Reward.h"
+#include "DynamicValue.h"
 #include <vector>
 #include "Vector_arma.h"
 #include "BTCSet.h"
 #include "ErrorHandler.h"
-#include "dlib_wrapper.h"
 #define CVector_arma CVector
 #define CMatrix_arma CMatrix
 #include "StateValuePairs.h"
+
 
 struct _RL_parameters
 {
@@ -23,7 +24,7 @@ struct _RL_parameters
 
 using namespace std;
 
-enum class object_type {state, control, exforce, parameter, reward, not_found};
+enum class object_type {state, control, exforce, parameter, reward, dynamicvalue, not_found};
 
 struct solversettings
 {
@@ -83,6 +84,7 @@ class System
         StateVariable *state(const string &s);
         ControlParameter *control(const string &s);
         ExternalForcing *exforce(const string &s);
+        DynamicValue *dynamicvalue(const string &s);
         Parameter *parameter(const string &s);
         Reward *reward(const string &s);
         double GetValue(const string &param, Expression::timing tmg=Expression::timing::present);
@@ -92,6 +94,7 @@ class System
         bool AppendExternalForcing(const ExternalForcing &extforce);
         bool AppendParameter(const Parameter &param);
         bool AppendReward(const Reward &rwd);
+        bool AppendDynamicValue(const DynamicValue &dyn);
         bool OneStepSolve(double dt);
         double dt() {return SolverTempVars.dt;}
         bool SetProp(const string &s, const double &val);
@@ -113,6 +116,7 @@ class System
         vector<ExternalForcing> externalforcings;
         vector<Parameter> parameters;
         vector<Reward> rewards;
+        vector<DynamicValue> dynamicvalues;
         CVector_arma GetStateVariables(Expression::timing tmg);
         CVector_arma GetResiduals(CVector_arma &X);
         bool Renew();

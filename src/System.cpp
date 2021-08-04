@@ -21,6 +21,7 @@ System::System(const System& other)
     controlparameters = other.controlparameters;
     parameters = other.parameters;
     rewards = other.rewards;
+    dynamicvalues = other.dynamicvalues;
     SolverTempVars = other.SolverTempVars;
     SolverSettings = other.SolverSettings;
     SimulationParameters = other.SimulationParameters;
@@ -34,6 +35,7 @@ System& System::operator=(const System& rhs)
     controlparameters = rhs.controlparameters;
     parameters = rhs.parameters;
     rewards = rhs.rewards;
+    dynamicvalues = rhs.dynamicvalues;
     SolverTempVars = rhs.SolverTempVars;
     SolverSettings = rhs.SolverSettings;
     SimulationParameters = rhs.SimulationParameters;
@@ -63,6 +65,10 @@ Object* System::object(const string &s)
         if (rewards[i].GetName() == s)
             return &rewards[i];
 
+     for (int i=0; i<dynamicvalues.size(); i++)
+        if (dynamicvalues[i].GetName() == s)
+            return &dynamicvalues[i];
+
     return nullptr;
 }
 
@@ -82,6 +88,9 @@ void System::SetAllParents()
 
     for (int i=0; i<rewards.size(); i++)
         rewards[i].SetParent(this);
+
+    for (int i=0; i<dynamicvalues.size(); i++)
+        dynamicvalues[i].SetParent(this);
 
 }
 
@@ -107,6 +116,10 @@ object_type System::GetType(const string &param)
     for (int i=0; i<rewards.size(); i++)
         if (rewards[i].GetName() == param)
             return object_type::reward;
+
+    for (int i=0; i<dynamicvalues.size(); i++)
+        if (dynamicvalues[i].GetName() == param)
+            return object_type::dynamicvalue;
 
     return object_type::not_found;
 }
@@ -153,6 +166,14 @@ Reward* System::reward(const string &s)
     return nullptr;
 }
 
+DynamicValue* System::dynamicvalue(const string &s)
+{
+    for (int i=0; i<dynamicvalues.size(); i++)
+        if (dynamicvalues[i].GetName() == s)
+            return &dynamicvalues[i];
+    return nullptr;
+}
+
 double System::GetValue(const string &param, Expression::timing tmg)
 {
     if (GetType(param) == object_type::state)
@@ -169,6 +190,9 @@ double System::GetValue(const string &param, Expression::timing tmg)
 
     if (GetType(param) == object_type::reward)
         return reward(param)->Object::GetValue(tmg);
+
+    if (GetType(param) == object_type::dynamicvalue)
+        return dynamicvalue(param)->Object::GetValue(tmg);
 }
 
 bool System::AppendState(const StateVariable &stt)
@@ -198,6 +222,22 @@ bool System::AppendReward(const Reward &rwd)
     {
         rewards.push_back(rwd);
         reward(rwd.GetName())->SetParent(this);
+        return true;
+    }
+
+}
+
+bool System::AppendDynamicValue(const DynamicValue &dyn)
+{
+    if (object(dyn.GetName())!=nullptr)
+    {
+        cout<<"Object '" + dyn.GetName() + "' already exists!";
+        return false;
+    }
+    else
+    {
+        dynamicvalues.push_back(dyn);
+        dynamicvalue(dyn.GetName())->SetParent(this);
         return true;
     }
 
@@ -448,8 +488,11 @@ void System::InitiateOutputs()
     for (int i=0; i<externalforcings.size(); i++)
         Outputs.AllOutputs.append(CBTC(), externalforcings[i].GetName());
 
-     for (int i=0; i<rewards.size(); i++)
+    for (int i=0; i<rewards.size(); i++)
         Outputs.AllOutputs.append(CBTC(), rewards[i].GetName());
+
+    for (int i=0; i<dynamicvalues.size(); i++)
+        Outputs.AllOutputs.append(CBTC(), dynamicvalues[i].GetName());
 
 }
 
@@ -471,6 +514,12 @@ void System::PopulateOutputs()
         double _reward=rewards[i].GetReward();
         Outputs.AllOutputs[rewards[i].GetName()].append(SolverTempVars.t,_reward);
         totalreward += _reward;
+    }
+
+    for (int i=0; i<dynamicvalues.size(); i++)
+    {
+        double _dynamicvalue=dynamicvalues[i].GetValue();
+        Outputs.AllOutputs[dynamicvalues[i].GetName()].append(SolverTempVars.t,_dynamicvalue);
     }
 }
 

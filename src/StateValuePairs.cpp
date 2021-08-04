@@ -1,7 +1,7 @@
 #include "StateValuePairs.h"
 #include <gsl/gsl_multifit.h>
 #include "Vector.h"
-#include "dlib/mlp.h"
+
 
 StateValuePairs::StateValuePairs()
 {
@@ -32,25 +32,12 @@ bool StateValuePairs::Update_ANN()
 
 bool StateValuePairs::Train_ANN()
 {
-    if (statevalues.size()==0)
-        return false;
-    typedef dlib::matrix<double, 0, 1> sample_type;
-    sample_type sample;
-    long n_statevars = statevalues[0].state.size();
-    sample.set_size(n_statevars,1);
-    for (int i=0; i<statevalues.size(); i++)
-    {
-        for (int j=0; j<statevalues[i].state.size(); j++)
-            sample(j) = statevalues[i].state[j];
-        netp->train(sample,statevalues[i].value);
-    }
+    return true;
 
 }
 
 bool StateValuePairs::InitializeANN(int n_state_variables, int n_layers, vector<int> n_hidden_nodes)
 {
-    mlp::kernel_1a_c net(2,5);
-    netp = &net;
     return true;
 }
 

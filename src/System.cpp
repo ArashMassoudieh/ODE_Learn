@@ -479,6 +479,8 @@ double System::UpdateValue()
 {
     double val = EvaluateValue(Expression::timing::present);
     double out = StateValues->LearningParameters.beta*val + GetTotalRewards(Expression::timing::past);
+    return out;
+
 }
 
 
@@ -506,21 +508,29 @@ void System::InitiateOutputs()
 
 void System::PopulateOutputs()
 {
+
+
     for (int i=0; i<statevariables.size(); i++)
         Outputs.AllOutputs[statevariables[i].GetName()].append(SolverTempVars.t,statevariables[i].GetValue());
 
+
     for (int i=0; i<controlparameters.size(); i++)
         Outputs.AllOutputs[controlparameters[i].GetName()].append(SolverTempVars.t,controlparameters[i].GetValue());
+
+
 
     for (int i=0; i<externalforcings.size(); i++)
         Outputs.AllOutputs[externalforcings[i].GetName()].append(SolverTempVars.t,externalforcings[i].Object::GetValue());
 
     totalreward = 0;
+
+
     for (int i=0; i<rewards.size(); i++)
     {
         double _reward=rewards[i].GetReward();
         Outputs.AllOutputs[rewards[i].GetName()].append(SolverTempVars.t,_reward);
     }
+
 
     _statevaluepair stval = GetCurrentStateValuePair();
     stval.value = UpdateValue();
@@ -531,6 +541,8 @@ void System::PopulateOutputs()
         double _dynamicvalue=dynamicvalues[i].GetValue();
         Outputs.AllOutputs[dynamicvalues[i].GetName()].append(SolverTempVars.t,_dynamicvalue);
     }
+
+
 
 }
 
@@ -719,4 +731,5 @@ double System::GetTotalRewards(Expression::timing tmg)
     {
         out += rewards[i].GetReward(tmg);
     }
+    return out;
 }

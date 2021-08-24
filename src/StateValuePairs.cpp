@@ -92,6 +92,8 @@ bool StateValuePairs::Train_MLR()
     gsl_vector_free (c);
     gsl_matrix_free (cov);
 
+    return true;
+
 
 }
 
@@ -103,6 +105,7 @@ bool StateValuePairs::Train()
             Train_MLR();
     }
     train_counter ++;
+    return true;
 }
 
 
@@ -123,6 +126,7 @@ bool StateValuePairs::WriteToFile(const string &filename)
         f<<statevalues[i].value<<endl;
      }
 	f.close();
+	return true;
 }
 
 
@@ -135,7 +139,7 @@ double StateValuePairs::EstimateValue(const vector<double> &state)
         {
             for (unsigned int i=1; i<regression_parameters.coefficients.size(); i++)
             {
-                out += state[i]*regression_parameters.coefficients[i];
+                out += state[i-1]*regression_parameters.coefficients[i];
             }
             out+=regression_parameters.coefficients[0];
         }

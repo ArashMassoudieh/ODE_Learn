@@ -20,11 +20,13 @@ int main()
     Inflow.SetName("Inflow");
     cout<<2<<endl;
     Inflow.TimeSeries()->readfile("Inflow_rate.txt");
+    cout<<Inflow.TimeSeries()->n<<endl;
     cout<<3<<endl;
     Reward rwd;
     rwd.SetName("Shortage");
     sys.AppendExternalForcing(Inflow);
     rwd.SetReward(Expression("-_pos(0.5-k1*Storage)",&sys));
+    cout<<4<<endl;
     DynamicValue dyn;
     dyn.SetName("outflow");
     dyn.SetExpression(Expression("k1*Storage",&sys));
@@ -37,6 +39,7 @@ int main()
     sys.SetProp("tend",10);
     sys.SetProp("dt",0.01);
     sys.GetStateValuePair()->LearningParameters.beta = 0.1;
+    cout<<"Solving ..."<<endl;
     sys.Solve();
     sys.Outputs.AllOutputs.writetofile("Output.txt",true);
     sys.GetStateValuePair()->WriteToFile("StateValues.txt");

@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include "dlib/mlp.h"
+
 
 using namespace std;
 struct _statevaluepair
@@ -45,6 +45,7 @@ class StateValuePairs
                 }
             }
             statevalues.push_back(stval);
+            return true;
 
         }
         bool Append(const vector<double> &state, const double &value)

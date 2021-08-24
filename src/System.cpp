@@ -2,16 +2,18 @@
 #include <iostream>
 #include "Vector_arma.h"
 #include "Matrix_arma.h"
+#include "Matrix.h"
 
 using namespace std;
 System::System()
 {
-    //ctor
+    if (StateValues==nullptr)
+        StateValues = new StateValuePairs();
 }
 
 System::~System()
 {
-    //dtor
+
 }
 
 System::System(const System& other)
@@ -464,14 +466,19 @@ bool System::SetProp(const string &s, const double &val)
     return false;
 }
 
-_statevaluepair System::GetStateValuePair()
+_statevaluepair System::GetCurrentStateValuePair()
 {
+    _statevaluepair stvalpair;
+    for (int i=0; i<statevariables.size(); i++)
+        stvalpair.state.push_back(statevariables[i].GetValue(Expression::timing::present));
 
+    return stvalpair;
 }
 
-void System::UpdateValue()
+double System::UpdateValue()
 {
-
+    double val = EvaluateValue(Expression::timing::present);
+    double out = StateValues->LearningParameters.beta*val + GetTotalRewards(Expression::timing::past);
 }
 
 
@@ -513,14 +520,24 @@ void System::PopulateOutputs()
     {
         double _reward=rewards[i].GetReward();
         Outputs.AllOutputs[rewards[i].GetName()].append(SolverTempVars.t,_reward);
-        totalreward += _reward;
     }
+
+    _statevaluepair stval = GetCurrentStateValuePair();
+    stval.value = UpdateValue();
+    StateValues->Append(stval);
 
     for (int i=0; i<dynamicvalues.size(); i++)
     {
         double _dynamicvalue=dynamicvalues[i].GetValue();
         Outputs.AllOutputs[dynamicvalues[i].GetName()].append(SolverTempVars.t,_dynamicvalue);
     }
+
+}
+
+void System::UpdateControlParameters()
+{
+    for (unsigned int i=0; i<controlparameters.size(); i++)
+        controlparameters[i].SetValueRandom();
 }
 
 bool System::Solve()
@@ -543,6 +560,7 @@ bool System::Solve()
 
     while (SolverTempVars.t<SimulationParameters.tend+SolverTempVars.dt)
     {
+        UpdateControlParameters();
         SolverTempVars.dt = min(SolverTempVars.dt_base,GetMinimumNextTimeStepSize());
         if (SolverTempVars.dt<SimulationParameters.dt0/100) SolverTempVars.dt=SimulationParameters.dt0/100;
         ShowMessage(string("t = ") + numbertostring(SolverTempVars.t));
@@ -578,6 +596,8 @@ bool System::Solve()
             ShowMessage("t = " + numbertostring(SolverTempVars.t));
             PopulateOutputs();
             Update();
+            StateValues->Train();
+            CMatrix X = GradientvsControlParameter(SolverTempVars.dt);
             //UpdateObjectiveFunctions(SolverTempVars.t);
         }
 
@@ -615,5 +635,88 @@ void System::PrepareTimeSeries()
     for (int i=0; i<externalforcings.size();i++)
     {
         externalforcings[i].TimeSeries()->assign_D();
+    }
+}
+
+CMatrix_arma System::GradientvsControlParameter(const double &dt)
+{
+    CMatrix_arma Gradient(statevariables.size(),controlparameters.size());
+    for (unsigned int i=0; i<statevariables.size(); i++)
+    {
+        CVector grad1 = state(i)->GradientvsControlParameters(dt);
+        for (unsigned int j=0; j<controlparameters.size(); j++)
+            Gradient[i][j] = grad1[j];
+    }
+    return Gradient;
+
+}
+
+unsigned int System::Count(object_type objtype)
+{
+    if (objtype == object_type::control)
+        return controlparameters.size();
+    if (objtype == object_type::dynamicvalue)
+        return dynamicvalues.size();
+    if (objtype == object_type::exforce)
+        return externalforcings.size();
+    if (objtype == object_type::parameter)
+        return parameters.size();
+    if (objtype == object_type::reward)
+        return rewards.size();
+    if (objtype == object_type::state)
+        return statevariables.size();
+    return 0;
+}
+
+StateVariable *System::state(unsigned int i)
+{
+    if (i<statevariables.size())
+        return &statevariables[i];
+    else
+        return nullptr;
+
+}
+ControlParameter *System::control(unsigned int i)
+{
+    if (i<controlparameters.size())
+        return &controlparameters[i];
+    else
+        return nullptr;
+}
+ExternalForcing *System::exforce(unsigned int i)
+{
+    if (i<externalforcings.size())
+        return &externalforcings[i];
+    else
+        return nullptr;
+}
+DynamicValue *System::dynamicvalue(unsigned int i)
+{
+    if (i<dynamicvalues.size())
+        return &dynamicvalues[i];
+    else
+        return nullptr;
+}
+Parameter *System::parameter(unsigned int i)
+{
+    if (i<parameters.size())
+        return &parameters[i];
+    else
+        return nullptr;
+}
+
+double System::EvaluateValue(Expression::timing tmg)
+{
+    vector<double> S = GetStateVariables(tmg).vec;
+    return StateValues->EstimateValue(S);
+
+}
+
+double System::GetTotalRewards(Expression::timing tmg)
+{
+    double out = 0;
+    for (unsigned int i=0; i<rewards.size(); i++)
+    {
+        out += rewards[i].GetReward(tmg);
     }
 }

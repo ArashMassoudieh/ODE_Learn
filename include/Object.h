@@ -3,7 +3,7 @@
 
 #include <string>
 #include <Expression.h>
-
+#define EPSILON 1e-6
 class System;
 
 using namespace std;
@@ -38,6 +38,7 @@ class Object
         }
         void SetParent(System *system);
         System* Parent() {return parent;}
+
     protected:
 
     private:

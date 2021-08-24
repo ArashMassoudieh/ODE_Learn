@@ -3,6 +3,7 @@
 
 #include "Object.h"
 #include "Expression.h"
+#include "Vector.h"
 
 class StateVariable : public Object
 {
@@ -20,6 +21,7 @@ class StateVariable : public Object
             double out = rateofchange.calc(Parent(),tmg);
             return out;
         }
+        CVector GradientvsControlParameters(const double &dt);
     protected:
 
     private:

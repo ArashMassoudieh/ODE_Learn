@@ -8,6 +8,16 @@ StateValuePairs::StateValuePairs()
     //ctor
 }
 
+StateValuePairs::StateValuePairs(unsigned int number_of_state_variables)
+{
+    regression_parameters.coefficients.resize(number_of_state_variables+1);
+}
+
+void StateValuePairs::SetNumberofStateVariables(unsigned int number_of_state_variables)
+{
+    regression_parameters.coefficients.resize(number_of_state_variables+1);
+}
+
 StateValuePairs::~StateValuePairs()
 {
     //dtor
@@ -85,9 +95,51 @@ bool StateValuePairs::Train_MLR()
 
 }
 
+bool StateValuePairs::Train()
+{
+    if (train_counter%update_interval == 0)
+    {
+        if (trainmethod == _trainmethod::linear_regression)
+            Train_MLR();
+    }
+    train_counter ++;
+}
+
+
 string StateValuePairs::GetCoefficientsAsString()
 {
     CVector V(regression_parameters.coefficients);
     return V.toString();
+
+}
+
+bool StateValuePairs::WriteToFile(const string &filename)
+{
+    ofstream f(filename.c_str(),std::ofstream::out);
+	for (unsigned int i=0; i<statevalues.size(); i++)
+     {
+        for (unsigned int j=0; j<statevalues[i].state.size(); j++)
+            f<<statevalues[i].state[j]<<",";
+        f<<statevalues[i].value<<endl;
+     }
+	f.close();
+}
+
+
+double StateValuePairs::EstimateValue(const vector<double> &state)
+{
+    if (trainmethod == _trainmethod::linear_regression)
+    {
+        double out = 0;
+        if (regression_parameters.coefficients.size()>0)
+        {
+            for (unsigned int i=1; i<regression_parameters.coefficients.size(); i++)
+            {
+                out += state[i]*regression_parameters.coefficients[i];
+            }
+            out+=regression_parameters.coefficients[0];
+        }
+        return out;
+    }
 
 }

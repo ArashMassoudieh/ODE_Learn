@@ -86,6 +86,12 @@ class System
         ExternalForcing *exforce(const string &s);
         DynamicValue *dynamicvalue(const string &s);
         Parameter *parameter(const string &s);
+        StateVariable *state(unsigned int i);
+        ControlParameter *control(unsigned int i);
+        ExternalForcing *exforce(unsigned int i);
+        DynamicValue *dynamicvalue(unsigned int i);
+        Parameter *parameter(unsigned int i);
+        unsigned int Count(object_type objtype);
         Reward *reward(const string &s);
         double GetValue(const string &param, Expression::timing tmg=Expression::timing::present);
         object_type GetType(const string &param);
@@ -102,8 +108,13 @@ class System
         outputs Outputs;
         bool Solve();
         void ShowMessage(const string &msg);
-        _statevaluepair GetStateValuePair();
-        void UpdateValue();
+        _statevaluepair GetCurrentStateValuePair();
+        StateValuePairs *GetStateValuePair() {return StateValues;}
+        CMatrix_arma GradientvsControlParameter(const double &dt);
+        double UpdateValue();
+        void UpdateControlParameters();
+        double EvaluateValue(Expression::timing tmg);
+        double GetTotalRewards(Expression::timing tmg);
     protected:
 
     private:
@@ -131,7 +142,7 @@ class System
         double new_value=0;
         double old_value=0;
         double totalreward;
-        StateValuePairs StateValues;
+        StateValuePairs *StateValues = nullptr;
 
 };
 

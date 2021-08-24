@@ -928,14 +928,14 @@ int CTimeSeriesSet::lookup(string S)
 {
 	int out = -1;
 	for (unsigned int i = 0; i < names.size(); i++)
-		if (tolower(S) == tolower(names[i]))
+		if (S == names[i])
 		{
 			out = i;
 			return out;
 		}
 
 	for (unsigned int i = 0; i < BTC.size(); i++)
-		if (tolower(S) == tolower(BTC[i].name))
+		if (S == BTC[i].name)
 		{
 			out = i;
 			return out;

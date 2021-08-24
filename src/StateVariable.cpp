@@ -1,4 +1,5 @@
 #include "StateVariable.h"
+#include "System.h"
 
 StateVariable::StateVariable() : Object::Object()
 {
@@ -27,3 +28,19 @@ void StateVariable::Renew()
 {
     SetValue(GetValue(Expression::timing::present),Expression::timing::past);
 }
+
+CVector StateVariable::GradientvsControlParameters(const double &dt)
+{
+    CVector gradient(Parent()->Count(object_type::control));
+    double original_rateofchange = rateofchange.calc(Parent(),Expression::timing::past);
+    for (unsigned int i=0; i<Parent()->Count(object_type::control); i++)
+    {
+        double original_control_value = Parent()->control(i)->GetValue(Expression::timing::past);
+        Parent()->control(i)->SetValue(original_control_value+EPSILON,Expression::timing::past);
+        double new_rateofchange = rateofchange.calc(Parent(),Expression::timing::past);
+        gradient[i] = (new_rateofchange-original_rateofchange)/EPSILON*dt;
+        Parent()->control(i)->SetValue(original_control_value,Expression::timing::past);
+    }
+    return gradient;
+}
+
